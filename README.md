@@ -7,6 +7,8 @@ A LangGraph-powered, human-in-the-loop agent that scrapes jobs from multiple sou
 ![LangGraph](https://img.shields.io/badge/orchestration-LangGraph-1c3c3c)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 
+**Repository:** [github.com/pypi-ahmad/autonomous-job-application-agent](https://github.com/pypi-ahmad/autonomous-job-application-agent)
+
 ## Features
 
 - **Multi-source job aggregation** — LinkedIn, Indeed, Naukri, ZipRecruiter, and Glassdoor via [`python-jobspy`](https://github.com/cullenwatson/JobSpy), plus best-effort Wellfound scraping and LLM-based extraction from any company careers page you paste in. All sources are fetched in parallel and cross-source duplicates are merged.
