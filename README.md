@@ -6,6 +6,7 @@ A LangGraph-powered, human-in-the-loop agent that scrapes jobs from multiple sou
 ![Streamlit](https://img.shields.io/badge/UI-Streamlit-ff4b4b)
 ![LangGraph](https://img.shields.io/badge/orchestration-LangGraph-1c3c3c)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-green)
 
 **Repository:** [github.com/pypi-ahmad/autonomous-job-application-agent](https://github.com/pypi-ahmad/autonomous-job-application-agent)
 
@@ -190,7 +191,7 @@ https://jobs.another-company.com
 
 ## License
 
-No license file is currently included in this repository. Add a `LICENSE` file (e.g. MIT, Apache-2.0) before distributing or open-sourcing this project.
+[MIT](LICENSE)
 
 ## Acknowledgements
 
