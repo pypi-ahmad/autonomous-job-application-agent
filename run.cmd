@@ -35,7 +35,7 @@ if not exist ".env" (
     echo Created .env from .env.example - add your API keys there before using cloud models.
 )
 
-echo Starting Streamlit app...
-".venv\Scripts\python.exe" -m streamlit run app.py
+echo Starting Streamlit app on port 8843...
+".venv\Scripts\python.exe" -m streamlit run app.py --server.port 8843
 
 pause
