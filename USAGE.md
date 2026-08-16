@@ -5,13 +5,12 @@ setup instructions, see the [README](README.md#installation--setup) first.
 
 ## Starting the app
 
-- Windows one-click: double-click `run.cmd`.
-- Manual (any OS): `streamlit run app.py` from an activated virtualenv with
-  dependencies installed.
+- Windows one-click: double-click `run.cmd` (runs `uv sync`, then launches).
+- Manual (any OS): `uv sync --frozen` once, then `uv run streamlit run app.py`.
 
-Either way, open the URL Streamlit prints — `http://localhost:8501` by
-default (or `http://localhost:8843` if you're on a build where the default
-port was changed; check the terminal output either way).
+Either way, open the URL Streamlit prints — `http://localhost:8843` (the
+port `run.cmd` and the project both use; Streamlit's own default is 8501 if
+you launch it a different way).
 
 ## Sidebar: Model configuration
 
@@ -118,7 +117,7 @@ Submitted → Interview → Rejected → Offer (`tools/tracker.py`,
 |---|---|
 | "No Ollama models found" in the sidebar | `ollama serve` isn't running, or no model has been pulled. Run `ollama pull llama3.1` (or any model), confirm `ollama serve` is up, then reload the page. |
 | Sidebar shows "`<PROVIDER>_API_KEY` not set in environment" | Add the key to `.env` (copy from `.env.example` if you haven't) and restart the app — `.env` is only loaded at process start. |
-| `pip install -r requirements.txt` fails on `python-jobspy` / numpy | Install `numpy>=2.1` first, then `pip install --no-deps python-jobspy` — see the README's Installation section for why. |
+| `uv sync` fails on `python-jobspy` / numpy | Shouldn't happen — `pyproject.toml`'s `[tool.uv].override-dependencies` resolves this automatically. If it does, check that override is still present and re-run `uv lock`. |
 | No jobs come back from a run | Try broadening keywords/location, adding more boards, or raising "Results per board." Some boards occasionally return zero results for narrow searches. |
 | Wellfound or a career-page URL returns nothing | Both paths are best-effort scraping (no official API for Wellfound; career pages vary in structure). Try a different URL or rely on the job-board sources instead. |
 | Live mode did nothing after clicking Finalize | Confirm you typed `SUBMIT` exactly (case-sensitive) in the confirmation box — the button stays disabled otherwise. |

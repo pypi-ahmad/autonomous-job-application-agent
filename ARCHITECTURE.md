@@ -5,6 +5,13 @@ Audited against local checkout `0d328db9d8dbbfaffe5104c19c1ae7732e3d81dd` on `ma
 Local license: MIT (`LICENSE`). This document is cited to files in this checkout;
 see [Footnotes](#footnotes) for the full list.
 
+> **Updated 2026-08-17 (same day, later commit):** [MODERNIZATION_PLAN.md](MODERNIZATION_PLAN.md)'s
+> Phase 1 has since been executed. The tooling/CI sections below (Commands &
+> Verification Inventory, Deployment & Runtime Surface, Data/APIs/CI/testing,
+> Governance, Confidence assessment) have been corrected in place to reflect
+> that; everything else in this document (pipeline, scraping/dedup, matching)
+> is unaffected and unchanged.
+
 ## Part 1 — Whole-repo technical deep-dive
 
 **What this is.** A local, single-user Streamlit application that runs a LangGraph
@@ -19,7 +26,7 @@ graph.py:129-149).
 |---|---|---|
 | UI | Streamlit | `app.py:8,20` |
 | Orchestration | LangGraph `StateGraph` + `MemorySaver` checkpointer, 2 interrupt points | `graph.py:8-9,146-149` |
-| LLM integration | LangChain (`langchain-core`, `-openai`, `-google-genai`, `-ollama`) | `tools/llm_factory.py:6-8`, `requirements.txt:3-6` |
+| LLM integration | LangChain (`langchain-core`, `-openai`, `-google-genai`, `-ollama`) | `tools/llm_factory.py:6-8`, `pyproject.toml` dependencies |
 | Job scraping | `python-jobspy` (LinkedIn/Indeed/Naukri/ZipRecruiter/Glassdoor), custom Wellfound + career-page scrapers | `tools/job_scraper.py:9,17`, `tools/wellfound_scraper.py`, `tools/career_page_scraper.py` |
 | Resume parsing | `pypdf`, `python-docx` | `parsers/resume_parser.py:13-15` |
 | Persistence | flat JSON (`data/tracker.json`) + CSV export, no database | `tools/tracker.py:10,80` |
@@ -35,24 +42,28 @@ graph.py:129-149).
 
 | Command | Purpose | Evidence |
 |---|---|---|
-| `pip install -r requirements.txt` | Install pinned-by-name (not pinned-by-version) deps | `requirements.txt` (no version pins except `numpy>=2.1`) |
-| `pip install --no-deps python-jobspy` | Install jobspy without pulling its incompatible `numpy==1.26.3` pin back in | `requirements.txt:20-24`, README.md:93-95 |
-| `streamlit run app.py` | Run the app | README.md:98 |
-| `run.cmd` | Windows one-click setup + launch | README.md:77-80 |
+| `uv sync --frozen` | Install every pinned dependency from `uv.lock`, including `python-jobspy` (numpy conflict resolved via `[tool.uv].override-dependencies`, no separate step) | `pyproject.toml`, `uv.lock` |
+| `uv run streamlit run app.py` | Run the app | README.md |
+| `run.cmd` | Windows one-click setup + launch (`uv sync` then `uv run streamlit`) | `run.cmd` |
+| `uv run ruff check .` | Lint (scoped to `E`/`F` for this first pass — see `pyproject.toml` `[tool.ruff.lint]` comment) | `pyproject.toml`, `.github/workflows/ci.yml` |
+| `uv run pytest -v` | Run the test suite | `tests/`, `.github/workflows/ci.yml` |
 
-**No lint, format, typecheck, test, or CI command exists.** `[UNVERIFIED→CONFIRMED]`:
-no `pyproject.toml`, no `pytest.ini`/`tox.ini`, no `.github/workflows/`, no lockfile
-(`uv.lock`/`poetry.lock`/`Pipfile.lock`) anywhere in the checkout (confirmed via
-directory listing, 2026-08-17). This is not an inference — it is the complete absence
-of those files. CI enforcement (required status checks) is therefore also absent,
-not just unconfirmed.
+**CI now exists and is green:** `.github/workflows/ci.yml` runs `uv sync --frozen
+--all-groups` → `ruff check .` → `pytest -v` on every push/PR to `main`, Python
+3.13. First run succeeded 2026-08-17. **Not yet enforced**: turning it into a
+required status check is a manual GitHub → Settings → Branches step, not done
+by this pass (see MODERNIZATION_PLAN.md § 9).
 
-**Informal self-checks already exist**, just not collected by any test runner:
-`utils.py:22-31`, `tools/dedup.py:43-52`, `agents/resume_advisor.py:33-44`, and
-`agents/matcher.py:128-153` each define a `demo()` function with real `assert`
-statements, run via `if __name__ == "__main__"`. Re-run 2026-08-17: all four pass
-(`utils.demo`, `dedup.demo`, `resume_advisor.demo`, `matcher.demo` — verified live,
-not inferred).
+**Test suite:** four `pytest` tests in `tests/` — `test_utils.py`,
+`test_dedup.py`, `test_resume_advisor.py`, `test_matcher.py` — converted
+verbatim from the project's original `demo()` self-checks (same assertions).
+They cover deterministic logic only (dedup, resume-profile analytics, the
+matcher's non-LLM keyword-overlap path via a stub LLM). LLM-integration paths
+(resume parsing, drafting, company research, matcher's LLM-judged factors) and
+live scraping are **not** covered by CI — deliberately, to avoid committing
+test API keys or making live network calls from CI (see
+MODERNIZATION_PLAN.md § 3, economic triage). Those paths are covered only by
+the manual verification checklist in `CONTRIBUTING.md`.
 
 ### Directory layout
 
@@ -75,24 +86,35 @@ not inferred).
 | `tools/company_research.py` | DuckDuckGo HTML scraping + LLM synthesis |
 | `tools/tracker.py` | JSON-file CRM: status lifecycle, timeline, CSV export |
 | `data/` | Runtime-only: uploads, `tracker.json`, CSV export. Not committed. |
+| `tests/` | `pytest` suite: `test_utils.py`, `test_dedup.py`, `test_resume_advisor.py`, `test_matcher.py` |
+| `pyproject.toml` / `uv.lock` | Project metadata, pinned dependencies (`uv`) |
+| `.python-version` | Pins Python 3.13 for `uv` (local and CI) |
+| `.github/workflows/ci.yml` | Lint (`ruff`) + test (`pytest`) on push/PR to `main` |
 
 ### Deployment & Runtime Surface
 
-Local-only; there is no container, no CI runner image, and no deployed service.
-`README.md:5` badges Python 3.11+; the installed dev environment (`.venv`) is
-Python 3.13.15 (confirmed live, 2026-08-17). No `.python-version`/`runtime.txt`
-pins an exact interpreter — the floor is asserted only in a README badge, not
-enforced anywhere.
+Local-only; no container, no deployed service. A CI runner image now exists:
+`.github/workflows/ci.yml` runs on GitHub's `ubuntu-latest`, Python 3.13 only
+(matrix widening to 3.11/3.12 deferred — see MODERNIZATION_PLAN.md § 9).
+`README.md` badges Python 3.11+ as the floor; `.python-version` now pins the
+dev/CI interpreter to 3.13 exactly, so the README's stated floor and the
+enforced version are two different numbers by design (3.11 is the claimed
+minimum, 3.13 is what's actually tested).
 
 ### EOL / dead-dependency scan
 
-Nothing EOL. LangGraph, LangChain, Streamlit, and the provider SDKs are all current
-generations `[INFERRED from requirements.txt's unpinned names — no version can be
-EOL-checked without pinning]`. The one known-fragile dependency is intentional and
-documented: `python-jobspy` pins `numpy==1.26.3`, incompatible with modern Python
-on Windows, worked around via `--no-deps` (requirements.txt:20-24). `tools/wellfound_scraper.py:1-6`
-and `tools/career_page_scraper.py:1-6` self-document as best-effort/fragile by
-design (scrape a JS SSR payload / arbitrary page markup with no stable contract).
+Nothing EOL. Dependencies are now version-pinned in `uv.lock`, so this can be
+checked directly rather than inferred: LangGraph, LangChain, Streamlit, and the
+provider SDKs all resolved to current-generation releases at lock time
+(2026-08-17). The one known-fragile dependency is intentional and documented:
+`python-jobspy` declares `numpy==1.26.3`, incompatible with modern Python on
+Windows — resolved via `[tool.uv].override-dependencies = ["numpy>=2.1"]` in
+`pyproject.toml`, which resolves to numpy 2.5.2 today (verified live,
+2026-08-17) instead of the manual `--no-deps` step this document previously
+described. `tools/wellfound_scraper.py:1-6` and `tools/career_page_scraper.py:1-6`
+self-document as best-effort/fragile by design (scrape a JS SSR payload /
+arbitrary page markup with no stable contract) — that remains true and
+unaffected by the dependency-tooling change.
 
 ### Data, APIs, background jobs, CI/CD, testing
 
@@ -104,9 +126,12 @@ design (scrape a JS SSR payload / arbitrary page markup with no stable contract)
 - **Background jobs:** none; `ThreadPoolExecutor` is used only for one-shot
   parallel fan-out within a single scrape call (`tools/job_scraper.py:79-89`), not
   a persistent worker.
-- **CI/CD:** none exists (see Commands inventory above).
-- **Testing:** none collected; four `demo()` self-checks exist but require manual
-  invocation (see above).
+- **CI/CD:** `.github/workflows/ci.yml` — lint + test on push/PR to `main`,
+  green on first run; not yet an enforced required status check (see Commands
+  inventory above).
+- **Testing:** four `pytest` tests collected and passing in CI, covering
+  deterministic logic only; LLM-integration and live-scraping paths remain
+  manual-only (see Commands inventory above).
 
 ## Part 2 — Context & ecosystem
 
@@ -120,9 +145,10 @@ project local-first (no telemetry/hosted backend) and preserve the dry-run/`SUBM
 safety gate (`CONTRIBUTING.md`).
 
 **Developer gotchas:**
-- `python-jobspy`'s `--no-deps` install order is load-bearing — installing it
-  normally reintroduces the broken `numpy==1.26.3` pin on modern Python/Windows
-  (`requirements.txt:20-24`).
+- `python-jobspy`'s numpy conflict is now handled declaratively by `uv`'s
+  dependency override (`pyproject.toml`) — a plain `uv sync` resolves it. If
+  you ever add a `pip install`-based workflow alongside `uv`, the old
+  `--no-deps python-jobspy` step would be needed again in that path only.
 - `agents/matcher.py:13-15` and `tools/dedup.py:8-10` both carry `ponytail:`
   comments naming a known scaling ceiling (sequential per-job LLM calls;
   O(n²) dedup) that's fine at the app's current "hundreds of jobs" scale but
@@ -190,8 +216,9 @@ enforced only by convention (no import-linter/architecture test exists).
   five factors (`agents/matcher.py:37-44,106-113`). *Consequences:* one factor is
   fully explainable/reproducible; the other five vary run-to-run.
 
-**Governance:** none yet — no CODEOWNERS, no branch protection, no required CI
-(see Modernization plan).
+**Governance:** `.github/workflows/ci.yml` exists and runs, but no CODEOWNERS
+and no branch protection / required status check — CI runs on every push/PR
+but does not yet block merges (manual step, see MODERNIZATION_PLAN.md § 9).
 
 **How to add a feature:** add/modify a node function in `graph.py`, wire it into
 `build_graph()`'s edges, extend `AgentState` in `state.py` if new fields are
@@ -241,10 +268,10 @@ on the harder-to-formalize factors (domain fit, seniority fit).
 | Claim area | Confidence |
 |---|---|
 | Pipeline structure, node responsibilities, interrupt points | High — read directly from `graph.py` |
-| No CI/tests/lockfile exists | High — confirmed by directory listing and successful local run, not inference |
+| CI exists and passed on its first run | High — `.github/workflows/ci.yml` authored this pass, observed green via `gh run list` 2026-08-17 |
 | Matching formula and weights | High — read directly from `agents/matcher.py` |
-| Dependency versions being "current" (no EOL) | Inferred — `requirements.txt` has no version pins to check against advisory databases |
-| CI enforcement status if CI is added later | N/A — no CI exists yet |
+| Dependency versions being "current" (no EOL) | High — `uv.lock` now pins exact versions; resolved clean against current PyPI at lock time |
+| CI enforcement (required status check) status | Confirmed absent — not yet configured; this is a manual GitHub Settings step, not an agent task |
 | Scale ceilings (O(n²) dedup, sequential LLM calls) being acceptable today | High — directly stated in source comments by the original author, re-confirmed by re-reading the code paths |
 
 ## Footnotes
@@ -258,5 +285,7 @@ on the harder-to-formalize factors (domain fit, seniority fit).
 - `parsers/resume_parser.py` — resume text extraction and structuring
 - `tools/job_scraper.py`, `tools/wellfound_scraper.py`, `tools/career_page_scraper.py`, `tools/dedup.py`, `tools/company_research.py`, `tools/tracker.py`, `tools/llm_factory.py` — scraping, dedup, research, persistence, provider construction
 - `utils.py` — logging setup and LLM-output cleanup
-- `requirements.txt` — dependency list (unpinned)
+- `pyproject.toml`, `uv.lock` — pinned dependency list and lockfile
+- `.github/workflows/ci.yml` — CI: lint + test on push/PR to `main`
+- `tests/` — pytest suite converted from the original `demo()` self-checks
 - `CONTRIBUTING.md` — safety-gate and local-first rules this plan must preserve
