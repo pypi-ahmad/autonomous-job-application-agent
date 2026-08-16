@@ -10,6 +10,42 @@ A LangGraph-powered, human-in-the-loop agent that scrapes jobs from multiple sou
 
 **Repository:** [github.com/pypi-ahmad/autonomous-job-application-agent](https://github.com/pypi-ahmad/autonomous-job-application-agent)
 
+## Contents
+
+- [Open source and community](#open-source-and-community)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Installation & Setup](#installation--setup)
+- [Environment Variables](#environment-variables)
+- [Usage](#usage)
+- [How It Works (Architecture)](#how-it-works-architecture)
+- [Configuration Options](#configuration-options)
+- [Future Improvements](#future-improvements)
+- [Documentation](#documentation)
+- [License](#license)
+
+## Open source and community
+
+This is a free, open-source (MIT), community-driven project. Cloning,
+forking, testing, filing bugs, suggesting features, and sending pull
+requests are all welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and
+[SUPPORT.md](SUPPORT.md). This project does not want or accept donations,
+sponsorship, or paid support of any kind; testing and patches are worth
+more here than money.
+
+You run this entirely on your own machine with your own API keys. Nobody
+but you sees your resume, generated content, job search results, or
+tracker data — and you are responsible for everything you process with it,
+including compliance with each job board's terms of service. See
+[DISCLAIMER.md](DISCLAIMER.md) for the full breakdown, and
+[SECURITY.md](SECURITY.md) for how to report a vulnerability.
+
+> [!IMPORTANT]
+> Dry-run mode is on by default. Live mode still requires typing `SUBMIT`
+> and only opens the job listing in your browser — this agent never
+> auto-fills or auto-submits a third-party site's application form.
+
 ## Features
 
 - **Multi-source job aggregation** — LinkedIn, Indeed, Naukri, ZipRecruiter, and Glassdoor via [`python-jobspy`](https://github.com/cullenwatson/JobSpy), plus best-effort Wellfound scraping and LLM-based extraction from any company careers page you paste in. All sources are fetched in parallel and cross-source duplicates are merged.
@@ -118,6 +154,9 @@ Set these in `.env` (copied from `.env.example`). All keys are read from the env
 
 ## Usage
 
+See [USAGE.md](USAGE.md) for the full walkthrough with troubleshooting.
+Short version:
+
 1. **Configure models** (sidebar) — pick a local Ollama model for parsing/matching/drafting, and a provider + model for the final polish pass (OpenAI-compatible, Agnes AI, or Google Gemini).
 2. **Configure generation & safety settings** (sidebar) — cover letter tone, location preference, dry-run toggle (on by default), delay between requests, and optional career page URLs.
 3. **Pipeline tab → Resume & job search** — upload a PDF/DOCX resume, set keywords, location, job boards, experience level, results per board, and screening questions, then click **Run**. This parses your resume, scrapes/aggregates jobs, and scores every match.
@@ -188,6 +227,20 @@ https://jobs.another-company.com
 - A cross-platform launch script (`run.sh`) alongside `run.cmd`
 - Automated tests / CI
 - User-adjustable match-factor weights in the UI
+
+## Documentation
+
+| Document | What it is |
+|---|---|
+| [USAGE.md](USAGE.md) | Step-by-step walkthrough of every tab and setting, plus troubleshooting |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to set up, test, and send a PR |
+| [SUPPORT.md](SUPPORT.md) | How to get help and report bugs |
+| [SECURITY.md](SECURITY.md) | How to report a vulnerability |
+| [DISCLAIMER.md](DISCLAIMER.md) | No-warranty, data responsibility, and job-board terms-of-service notes |
+| [LICENSE](LICENSE) | MIT license text |
+
+This project does not want or accept donations, sponsorship, or paid
+support of any kind.
 
 ## License
 
