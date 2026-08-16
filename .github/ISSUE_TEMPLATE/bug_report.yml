@@ -1,0 +1,87 @@
+name: Bug report
+description: Report a bug or unexpected behaviour.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Use a synthetic or redacted resume and
+        never include real API keys, tracker data, or generated cover
+        letters/screening answers.
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit or tag
+      description: The commit SHA or tag you're running (`git log -1 --oneline`).
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Minimal steps that trigger the bug. Include which job boards,
+        the local/polish model providers selected, and whether you were
+        in dry-run or live mode.
+      placeholder: |
+        1. Upload a synthetic resume PDF.
+        2. Select linkedin + indeed, dry-run on.
+        3. Configure Ollama llama3.1 + OpenAI-compatible polish model.
+        4. Click Run.
+        5. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or error output
+      description: |
+        Copy the terminal/Streamlit error output. Remove API keys, resume
+        content, generated letters, and tracker data first.
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: |
+        OS, Python version, whether you used run.cmd or manual setup,
+        job boards involved, and configured providers/models. Never
+        include key values.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: I can reproduce the bug on the current `main` branch.
+          required: true
+        - label: I removed API keys, real resume content, and tracker data from this report.
+          required: true

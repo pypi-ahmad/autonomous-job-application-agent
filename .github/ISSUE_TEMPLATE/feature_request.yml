@@ -1,0 +1,54 @@
+name: Feature request
+description: Suggest a new feature, job source, or pipeline improvement.
+title: "[feat] "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for new job sources, matching/scoring changes,
+        content-generation behaviour, tracker features, or other
+        user-visible changes.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user-facing problem does this solve, and why is the current behaviour insufficient?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: |
+        Describe the user-visible behaviour, pipeline step, or UI change
+        that would change.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you consider, and why is this the better path?
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: |
+        Who benefits? Does it change the safety gate (dry-run/live/SUBMIT),
+        a scoring factor, the tracker schema, or a supported provider?
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This does not weaken the dry-run default or the no-auto-submit safety gate.
+          required: true
+        - label: I would be willing to open a pull request.
