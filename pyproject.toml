@@ -1,0 +1,62 @@
+[project]
+name = "autonomous-job-application-agent"
+version = "1.1.0"
+description = "LangGraph + Streamlit agent that scrapes jobs, scores matches against your resume, drafts tailored applications, and tracks them - with human approval required at every step."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = [
+  "streamlit",
+  "langgraph",
+  "langchain-core",
+  "langchain-openai",
+  "langchain-google-genai",
+  "langchain-ollama",
+  "pypdf",
+  "python-docx",
+  "python-dotenv",
+  "pandas",
+  "httpx",
+  # python-jobspy's own runtime deps, declared explicitly (see [tool.uv]
+  # override below for why numpy isn't pinned to jobspy's declared version).
+  "beautifulsoup4",
+  "markdownify",
+  "regex",
+  "requests",
+  "tls-client",
+  "numpy>=2.1",
+  "python-jobspy",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "ruff",
+]
+
+[tool.uv]
+# python-jobspy pins numpy==1.26.3, which predates official Python 3.13+
+# wheels and installs a broken build on Windows. It only calls np.round()
+# internally, so a modern numpy is safe. This override replaces jobspy's
+# declared constraint during resolution instead of requiring a separate
+# `pip install --no-deps python-jobspy` step.
+override-dependencies = ["numpy>=2.1"]
+
+[tool.ruff]
+# Matches the longest line already in the codebase (139) rather than
+# reformatting existing files, which is out of scope for this phase.
+line-length = 140
+target-version = "py311"
+
+[tool.ruff.lint]
+# Standard pycodestyle-error + pyflakes set. This is the first lint pass this
+# project has ever had; the broader Pylint/flake8-blind-except/flake8-datetimez
+# rule families flag existing, deliberate patterns (broad excepts around
+# network calls, date.today() in a prompt template) that are out of scope for
+# this phase's no-behavior-change tooling migration - not silently ignored,
+# just not selected yet.
+select = ["E", "F"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

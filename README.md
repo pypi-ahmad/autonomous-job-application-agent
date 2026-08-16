@@ -73,6 +73,7 @@ _No screenshots included yet — add PDFs/GIFs of the Pipeline and Application T
 | Resume parsing | `pypdf`, `python-docx` |
 | Data handling | `pandas`, stdlib `json`/`csv` |
 | Config | `python-dotenv` |
+| Tooling | [`uv`](https://docs.astral.sh/uv/) (deps + lockfile), `pytest`, `ruff` (lint), GitHub Actions (CI) |
 
 ## Project Structure
 
@@ -83,7 +84,8 @@ Autonomous Job Application Agent/
 ├── state.py                     # Shared TypedDict state schema
 ├── config.py                    # Env-driven configuration & constants
 ├── utils.py                     # Logging + LLM-output cleanup helpers
-├── requirements.txt
+├── pyproject.toml                # Project metadata + dependencies (uv)
+├── uv.lock                       # Locked dependency versions
 ├── run.cmd                      # One-click Windows setup + launch
 ├── .env.example
 ├── agents/
@@ -108,31 +110,25 @@ Autonomous Job Application Agent/
 
 ## Installation & Setup
 
+Requires [`uv`](https://docs.astral.sh/uv/) (installs and pins Python 3.13 automatically per `.python-version`).
+
 ### Option A — one-click (Windows)
 
 1. Double-click **`run.cmd`**.
-2. It will: create a `.venv` if one doesn't exist, install dependencies, copy `.env.example` to `.env` on first run, and launch the app.
-3. Open the URL Streamlit prints (defaults to `http://localhost:8501`).
+2. It will: run `uv sync` (installing Python 3.13 and every dependency from the locked `uv.lock` if needed), copy `.env.example` to `.env` on first run, and launch the app.
+3. Open the URL Streamlit prints (`http://localhost:8843`).
 4. Edit `.env` with your API keys, then re-run `run.cmd`.
 
 ### Option B — manual (any OS)
 
 ```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-
-# python-jobspy pins an old numpy with no working Windows wheel for modern
-# Python, so it's installed separately, without pulling that pin back in:
-pip install --no-deps python-jobspy
-
+uv sync --frozen
 cp .env.example .env   # then fill in your keys
-streamlit run app.py
+uv run streamlit run app.py
 ```
+
+`uv sync` resolves `python-jobspy`'s dependencies with a numpy override declared
+in `pyproject.toml`'s `[tool.uv]` section — no separate `--no-deps` step needed.
 
 > `run.cmd` is Windows-only. macOS/Linux users should follow Option B (only Windows has been tested for this project).
 
@@ -225,7 +221,9 @@ https://jobs.another-company.com
 - Batched/async matching to handle very large result sets faster
 - An official Wellfound API integration if/when one becomes available (current scraper is best-effort)
 - A cross-platform launch script (`run.sh`) alongside `run.cmd`
-- Automated tests / CI
+- Wider CI Python matrix (currently 3.13 only; README's floor is 3.11)
+- CI test coverage for the LLM-integration and live-scraping paths (currently
+  quarantined from CI — manual smoke test only, see CONTRIBUTING.md)
 - User-adjustable match-factor weights in the UI
 
 ## Documentation

@@ -2,30 +2,17 @@
 setlocal
 cd /d "%~dp0"
 
-if not exist ".venv\Scripts\python.exe" (
-    echo Creating virtual environment...
-    python -m venv .venv
-    if errorlevel 1 (
-        echo Failed to create virtual environment. Is Python installed and on PATH?
-        pause
-        exit /b 1
-    )
-)
-
-echo Installing dependencies...
-".venv\Scripts\python.exe" -m pip install --upgrade pip >nul
-".venv\Scripts\python.exe" -m pip install -r requirements.txt
+where uv >nul 2>nul
 if errorlevel 1 (
-    echo Dependency install failed. See errors above.
+    echo uv not found. Install it from https://docs.astral.sh/uv/ and re-run.
     pause
     exit /b 1
 )
 
-rem python-jobspy pins an old numpy that has no working Windows wheel for
-rem modern Python; install it without pulling that pin back in (see requirements.txt).
-".venv\Scripts\python.exe" -m pip install --no-deps python-jobspy
+echo Installing dependencies (uv sync)...
+uv sync --frozen
 if errorlevel 1 (
-    echo python-jobspy install failed. See errors above.
+    echo Dependency install failed. See errors above.
     pause
     exit /b 1
 )
@@ -36,6 +23,6 @@ if not exist ".env" (
 )
 
 echo Starting Streamlit app on port 8843...
-".venv\Scripts\python.exe" -m streamlit run app.py --server.port 8843
+uv run streamlit run app.py --server.port 8843
 
 pause

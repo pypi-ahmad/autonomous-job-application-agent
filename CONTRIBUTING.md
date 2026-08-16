@@ -28,33 +28,40 @@ comes with running it against real job boards and real resumes.
 ## Local setup
 
 Windows is the only platform this project has been tested on so far (the
-README says so explicitly) — Option B below should work on macOS/Linux too,
-but please call out in your PR if you've verified that.
+README says so explicitly) — the commands below should work on macOS/Linux
+too, but please call out in your PR if you've verified that.
+
+Install [`uv`](https://docs.astral.sh/uv/) first; it installs and pins the
+project's Python (3.13, via `.python-version`) automatically.
 
 ```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-pip install --no-deps python-jobspy   # see requirements.txt for why
-cp .env.example .env                  # fill in the keys you want to test with
-streamlit run app.py
+uv sync --frozen
+cp .env.example .env   # fill in the keys you want to test with
+uv run streamlit run app.py
 ```
 
 Install [Ollama](https://ollama.com/) and pull at least one model if you're
 touching resume parsing, matching, or draft generation — those paths need a
 local model configured.
 
-## No automated tests or CI yet
+## Automated tests and CI
 
-This project doesn't have a test suite or CI pipeline yet — that's an open
-item, not an oversight to route around. If you're fixing a bug, a small
-regression check (even a standalone script under a `tests/` you create) is
-appreciated but not required to get a PR reviewed. Adding the first real
-test suite or a CI workflow is itself a very welcome contribution.
+`.github/workflows/ci.yml` runs `ruff check .` and `pytest` on every push/PR
+to `main`. Run the same checks locally before opening a PR:
+
+```bash
+uv run ruff check .
+uv run pytest -v
+```
+
+The suite covers the deterministic logic only (deduplication, resume
+profile analytics, and the matcher's non-LLM keyword-overlap path, using a
+stub LLM). The LLM-integration paths (resume parsing, drafting, company
+research, matcher's LLM-judged factors) and live scraping stay quarantined
+from CI on purpose — no committed API keys, no live network calls in CI —
+and are covered only by the manual verification below. If you're changing
+one of those paths, add or update a deterministic unit test where possible,
+and always do the manual walkthrough.
 
 ## Manual verification
 
