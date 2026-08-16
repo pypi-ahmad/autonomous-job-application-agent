@@ -231,6 +231,8 @@ https://jobs.another-company.com
 | Document | What it is |
 |---|---|
 | [USAGE.md](USAGE.md) | Step-by-step walkthrough of every tab and setting, plus troubleshooting |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Cited technical deep-dive: pipeline, scraping/dedup, and matching subsystems |
+| [MODERNIZATION_PLAN.md](MODERNIZATION_PLAN.md) | Tooling/CI modernization plan and its status |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to set up, test, and send a PR |
 | [SUPPORT.md](SUPPORT.md) | How to get help and report bugs |
 | [SECURITY.md](SECURITY.md) | How to report a vulnerability |
@@ -251,3 +253,5 @@ support of any kind.
 - [python-jobspy](https://github.com/cullenwatson/JobSpy) by Cullen Watson
 - [Ollama](https://ollama.com/)
 - DuckDuckGo's HTML search endpoint (used, without an API key, for company research)
+
+<p align="center">Made with ❤️ by Ahmad Mujtaba</p>
