@@ -28,9 +28,12 @@ jobs:
 
       - name: Test
         run: |
-          uv run pytest -v
-          code=$?
+          # `run:` steps use `bash -e`, which would abort before `code=$?` if
+          # pytest failed outright - keep it behind `||` so the exit code is
+          # captured instead of short-circuiting the whole step.
+          uv run pytest -v || code=$?
+          code=${code:-0}
           # exit code 5 = no tests collected; the suite was removed in 241f148
           # and hasn't been rebuilt yet, so don't fail the build over it
-          if [ $code -eq 5 ]; then exit 0; fi
-          exit $code
+          if [ "$code" -eq 5 ]; then exit 0; fi
+          exit "$code"
