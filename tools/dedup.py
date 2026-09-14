@@ -14,6 +14,8 @@ def _normalize(text: str) -> str:
 
 
 def dedupe_jobs(jobs: list[dict], similarity_threshold: float = 0.88) -> list[dict]:
+    # 0.88 is empirically tuned: high enough to merge cross-site reposts of the same
+    # role (minor title variation), low enough to keep "Junior" and "Senior" variants separate.
     deduped: list[dict] = []
     for job in jobs:
         key_company = _normalize(job.get("company", ""))

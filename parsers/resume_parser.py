@@ -57,6 +57,8 @@ def extract_text(file_path: str) -> str:
 
 def parse_resume(file_path: str, llm) -> dict:
     text = extract_text(file_path)
+    # 12,000-character cap keeps the prompt within typical local-model context windows.
+    # Content beyond this limit is silently dropped; very long resumes may lose later sections.
     prompt = EXTRACTION_PROMPT.format(text=text[:12000], today=date.today().isoformat())
     response = llm.invoke([HumanMessage(content=prompt)])
     cleaned = strip_code_fences(response.content)

@@ -10,6 +10,8 @@ class GeneratedContent(TypedDict):
     job_id: str
     cover_letter: str
     screening_answers: dict[str, str]
+    # Status lifecycle driven by the UI: "pending" on creation, then "approved"
+    # or "rejected" by the human-approval step.
     status: Literal["pending", "approved", "rejected"]
     comment: str
     tone: str
@@ -26,4 +28,7 @@ class AgentState(TypedDict):
     generated: dict[str, GeneratedContent]
     company_research: dict[str, Any]
     model_config: dict[str, Any]
+    # operator.add is the LangGraph reducer for this field: each node appends to the
+    # existing list instead of overwriting it. Every other field is fully replaced by
+    # the partial dict a node returns.
     log: Annotated[list[str], operator.add]

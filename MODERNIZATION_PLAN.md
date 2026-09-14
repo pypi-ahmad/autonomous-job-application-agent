@@ -5,11 +5,10 @@ is forward-looking only.
 
 ## 1. Executive summary
 
-This is a young, actively-maintained, single-file-per-concern Python project on
-a fully current stack (LangGraph, Streamlit, LangChain, Python 3.13). It is not
-a legacy-rescue case — it is a healthy codebase that has never had dependency
-pinning, a test runner, or CI wired up, a gap the project's own README already
-names under "Future Improvements." The plan is deliberately one real phase:
+This is a young, single-file-per-concern Python project on a current stack
+(LangGraph, Streamlit, LangChain, Python 3.13). The codebase has never had
+dependency pinning, a test runner, or CI wired up — a gap the project's own
+README already names under "Future Improvements." The plan is a single phase:
 pin dependencies with `uv`, promote the four existing `demo()` self-checks into
 a real `pytest` suite, and author a CI workflow. Everything else in the codebase
 is current and gets no changes.
@@ -38,11 +37,10 @@ has collected and run automatically.
 **Conclusion:** this system is **already at 3 of 4 Testability Milestone
 conditions** (supported runtime, builds, boots) and has real assertions sitting
 inches from the fourth. This is not Strategy A (freeze-then-lift a barely-alive
-app) or Strategy B (walking-skeleton onto a dead corpse) — it's neither, because
-the app was never dead. The gap is pure mechanical wiring: pin dependencies,
-collect the existing checks under `pytest`, author CI. Call this **Strategy C
-(wire up what's already there)** — not one of the skill's two named strategies,
-because neither applies to a system this healthy.
+app) or Strategy B (walking-skeleton onto a dead corpse) — the app was never
+dead. The gap is pure mechanical wiring: pin dependencies, collect the existing
+checks under `pytest`, author CI. Call this **Strategy C (wire up what's already
+there)** — not one of the skill's two named strategies, because neither fits.
 
 **Testability Milestone:** reached in Phase 1 for the whole app (single
 component — there's no monorepo split here). **CI Milestone:** also Phase 1,
@@ -50,7 +48,7 @@ since Phase 1 is the first (and only) lit phase.
 
 **Safety-ladder rung chosen: L3 (partial gate), by deliberate choice, not by
 inability to reach L4.** Economic triage (skill § 2f): this is a solo local
-tool with no production users and no SLA — an operator, not a service. The
+tool with no production users and no SLA. The
 paths that would need L4 (live job-board scraping, live LLM provider calls)
 require either committing test API keys (a security anti-pattern this project's
 own SECURITY.md explicitly warns against) or hitting real job boards from CI

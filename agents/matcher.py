@@ -22,6 +22,8 @@ WEIGHTS = {
     "location": 0.10,
 }
 
+# Stopwords removed before keyword overlap scoring so common English words
+# don't inflate the score without indicating a real skill or domain match.
 _STOPWORDS = {
     "the", "a", "an", "and", "or", "of", "to", "in", "for", "with", "on", "is",
     "are", "as", "at", "by", "be", "will", "we", "you", "our", "your", "this",
@@ -45,6 +47,8 @@ def keyword_overlap_score(resume_text: str, description: str) -> int:
 
 
 def extract_required_years(description: str) -> int | None:
+    # Returns the first number matched; if a posting states a range ("3-5 years"),
+    # this returns the lower bound. Multiple mentions are not aggregated.
     match = re.search(r"(\d+)\+?\s*(?:years|yrs)", description.lower())
     return int(match.group(1)) if match else None
 

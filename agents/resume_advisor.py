@@ -4,6 +4,8 @@ from __future__ import annotations
 
 
 def flatten_skills(resume_data: dict) -> list[str]:
+    # resume_parser's LLM prompt asks for a categorized dict, but weaker models
+    # sometimes return a flat list instead; both shapes are handled here.
     skills = resume_data.get("skills", [])
     if isinstance(skills, dict):
         flat: list[str] = []

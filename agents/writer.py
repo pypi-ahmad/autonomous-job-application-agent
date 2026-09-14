@@ -51,6 +51,8 @@ Question: {question}
 
 
 def _company_context(company_research: dict | None) -> str:
+    # Filters out "Unknown" values because _EMPTY_BRIEF uses that as its missing-data
+    # sentinel; forwarding them to the LLM would instruct it to mention unknowns.
     if not company_research:
         return ""
     parts = [f"{k}: {v}" for k, v in company_research.items() if v and v != "Unknown"]
@@ -76,7 +78,7 @@ def draft_cover_letter(
         achievements=resume_data.get("achievements", []),
         title=job["title"],
         company=job["company"],
-        description=job["description"][:4000],
+        description=job["description"][:4000],  # same cap as in matcher.py
     )
     return llm.invoke([HumanMessage(content=prompt)]).content.strip()
 

@@ -259,9 +259,8 @@ One LLM call per job returns five 0-100 factor scores plus pros/cons/gaps/
 suggestions as JSON (`agents/matcher.py:52-104`); a sixth factor (`keywords`) is
 computed deterministically via token-overlap before the weighted sum
 (`agents/matcher.py:37-44,106-114`, weights at lines 16-23). This hybrid — one
-factor grounded in code, five in LLM judgment — is the project's most
-consequential design choice: it trades full explainability for judgment quality
-on the harder-to-formalize factors (domain fit, seniority fit).
+factor grounded in code, five in LLM judgment — trades full explainability for
+judgment quality on the harder-to-formalize factors (domain fit, seniority fit).
 
 ## Confidence assessment
 

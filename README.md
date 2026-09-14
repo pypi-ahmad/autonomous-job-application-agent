@@ -232,6 +232,9 @@ https://jobs.another-company.com
 |---|---|
 | [USAGE.md](USAGE.md) | Step-by-step walkthrough of every tab and setting, plus troubleshooting |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Cited technical deep-dive: pipeline, scraping/dedup, and matching subsystems |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Concise architecture reference: pipeline diagram, node responsibilities, external systems |
+| [docs/TECHNICAL.md](docs/TECHNICAL.md) | Stack rationale, invariants, error-handling patterns, and persistence paths |
+| [docs/RUNBOOK.md](docs/RUNBOOK.md) | Start/stop commands, common failures and fixes, log locations |
 | [MODERNIZATION_PLAN.md](MODERNIZATION_PLAN.md) | Tooling/CI modernization plan and its status |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to set up, test, and send a PR |
 | [SUPPORT.md](SUPPORT.md) | How to get help and report bugs |

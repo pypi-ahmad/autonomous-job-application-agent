@@ -37,6 +37,8 @@ Snippets:
 
 
 def _ddg_snippets(query: str, max_results: int = 5, timeout: int = 10) -> list[str]:
+    # html.duckduckgo.com returns a server-rendered HTML page (no JavaScript required)
+    # and needs no API key, unlike the official DuckDuckGo Instant Answers API.
     try:
         resp = requests.post(
             "https://html.duckduckgo.com/html/",
@@ -72,5 +74,6 @@ def research_company(company: str, llm) -> dict:
     try:
         brief = json.loads(cleaned)
     except json.JSONDecodeError:
+        # Fall back to using the first raw snippet as the summary rather than all-Unknown.
         brief = {**_EMPTY_BRIEF, "summary": snippets[0]}
     return brief

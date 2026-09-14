@@ -24,6 +24,9 @@ def get_chat_model(provider: Provider, model: str, reasoning_effort: str | None 
         )
 
     if provider == "agnes":
+        # Agnes AI exposes an OpenAI-compatible endpoint, so ChatOpenAI is reused
+        # with a different base_url and key rather than adding a new client class.
+        # reasoning_effort is not forwarded here because Agnes does not support it.
         return ChatOpenAI(
             model=config.AGNES_MODEL,
             api_key=config.AGNES_API_KEY,

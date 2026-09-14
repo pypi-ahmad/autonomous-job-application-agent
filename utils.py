@@ -6,6 +6,7 @@ import logging
 
 
 def setup_logging() -> logging.Logger:
+    # All tool/agent modules obtain this same logger via logging.getLogger("job_agent").
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     return logging.getLogger("job_agent")
 

@@ -22,10 +22,14 @@ st.set_page_config(page_title="Autonomous Job Application Agent", layout="wide")
 UPLOAD_DIR = Path("data/uploads")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+# Maps GeneratedContent.status (graph-internal vocabulary) to tracker CRM labels.
+# The graph and tracker use different status vocabularies; this bridge keeps them in sync.
 STATUS_MAP = {"pending": "Draft", "approved": "Approved", "rejected": "Rejected"}
 
 
 def init_session() -> None:
+    # build_graph() is called once per browser session, not on every Streamlit rerun.
+    # thread_id is the MemorySaver checkpoint key; a new UUID means a fresh pipeline run.
     if "thread_id" not in st.session_state:
         st.session_state.thread_id = str(uuid.uuid4())
     if "graph" not in st.session_state:
@@ -35,6 +39,8 @@ def init_session() -> None:
 
 
 def rc() -> dict:
+    # "run config" — the dict LangGraph requires to look up the correct checkpoint
+    # in MemorySaver. Every graph.invoke / get_state / update_state call must pass this.
     return {"configurable": {"thread_id": st.session_state.thread_id}}
 
 
@@ -100,6 +106,9 @@ def build_model_config(choices: dict) -> dict:
     provider_map = {"OpenAI-compatible": "openai", "Agnes AI": "agnes", "Google Gemini": "gemini"}
     polish_provider = provider_map[choices["provider_label"]]
     polish_llm = get_chat_model(polish_provider, choices["polish_model"], choices.get("reasoning_effort"))
+    # resume_llm / match_llm / draft_llm all point at the same local Ollama instance.
+    # Four named slots exist so individual steps could be routed to different models
+    # without changing callers; today they share one.
     return {
         "resume_llm": local_llm,
         "match_llm": local_llm,
@@ -141,7 +150,7 @@ def render_intake(choices: dict, settings: dict) -> None:
                 "location": location,
                 "sites": sites,
                 "results_wanted": results_wanted,
-                "hours_old": 72,
+                "hours_old": 72,  # hardcoded; not exposed in the sidebar
                 "screening_questions": questions,
             },
             "settings": settings,
@@ -219,6 +228,9 @@ def render_selection() -> None:
 
 
 def _apply_status(graph, job_id: str, letter: str, answers: dict, status: str, comment: str = "") -> None:
+    # Two independent stores must be updated: the LangGraph checkpoint (in-memory,
+    # drives pipeline logic) and the tracker JSON (on-disk, drives the Tracker tab).
+    # Neither drives the other automatically.
     snap = graph.get_state(rc())
     generated = dict(snap.values["generated"])
     generated[job_id] = {**generated[job_id], "cover_letter": letter, "screening_answers": answers, "status": status, "comment": comment}
@@ -400,6 +412,8 @@ def main() -> None:
     with tab_pipeline:
         if st.session_state.started:
             render_logs()
+            # LangGraph sets .next to the list of nodes the graph is paused before.
+            # This is how the UI detects which of the two interrupt points was hit.
             next_nodes = st.session_state.graph.get_state(rc()).next
             if "generate_content" in next_nodes:
                 render_selection()
@@ -408,6 +422,8 @@ def main() -> None:
             else:
                 st.success("Pipeline complete.")
                 if st.button("Start a new run"):
+                    # New UUID abandons the old LangGraph thread; MemorySaver retains
+                    # its checkpoint in memory but it becomes unreachable. No explicit cleanup.
                     st.session_state.thread_id = str(uuid.uuid4())
                     st.session_state.started = False
                     st.rerun()
