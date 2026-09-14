@@ -58,6 +58,8 @@ def node_generate_content(state: AgentState) -> dict:
     selected_ids = set(state["selected_job_ids"])
     tone = settings.get("tone", "Professional")
 
+    # company_research is built up incrementally across jobs in this call;
+    # the same company is only researched once even when multiple jobs match it.
     company_research = dict(state.get("company_research", {}))
     generated = {}
     for m in state["matches"]:
@@ -96,6 +98,8 @@ def node_generate_content(state: AgentState) -> dict:
 
 
 def node_human_approval(state: AgentState) -> dict:
+    # Deliberate no-op. This node exists solely as the second interrupt point.
+    # The UI detects it via graph.get_state(rc()).next containing "human_approval".
     return {"log": ["Awaiting human approval"]}
 
 
@@ -143,6 +147,8 @@ def build_graph():
     graph.add_edge("human_approval", "submit")
     graph.set_finish_point("submit")
 
+    # MemorySaver keeps checkpoint state in-process memory only; state is lost on
+    # process restart. Sufficient for a single-user local app — no external store needed.
     checkpointer = MemorySaver()
     # Pause before generate_content (user picks which matches to draft) and
     # before human_approval (user reviews/edits/comments/approves the content).

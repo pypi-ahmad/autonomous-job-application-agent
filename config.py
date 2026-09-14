@@ -7,9 +7,12 @@ import os
 import httpx
 from dotenv import load_dotenv
 
+# load_dotenv() runs at import time; all variables below are module-level singletons
+# read once when config.py is first imported, not re-read per call.
 load_dotenv()
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+# Configurable so any OpenAI-compatible endpoint (local proxy, Azure, etc.) can be used.
 OPENAI_BASE_URL = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
 
 AGNES_API_KEY = os.environ.get("AGNES_API_KEY")
@@ -34,7 +37,11 @@ COVER_LETTER_TONES = ["Professional", "Enthusiastic", "Concise", "Story-driven"]
 
 
 def list_ollama_models() -> list[str]:
-    """Query the local Ollama server for installed models. Empty list if unreachable."""
+    """Query the local Ollama server for installed models. Empty list if unreachable.
+
+    Makes a real HTTP call every time it is called. Streamlit calls it on every
+    rerun through sidebar_model_config(); the 3-second timeout keeps it fast enough.
+    """
     try:
         resp = httpx.get(f"{OLLAMA_HOST}/api/tags", timeout=3)
         resp.raise_for_status()

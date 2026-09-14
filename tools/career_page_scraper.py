@@ -42,7 +42,7 @@ def fetch_career_page_jobs(url: str, llm, timeout: int = 15) -> list[dict]:
         return []
 
     soup = BeautifulSoup(resp.text, "html.parser")
-    text = soup.get_text("\n", strip=True)[:8000]
+    text = soup.get_text("\n", strip=True)[:8000]  # keep within local-model context limits
     if not text:
         return []
 
@@ -60,6 +60,8 @@ def fetch_career_page_jobs(url: str, llm, timeout: int = 15) -> list[dict]:
         title = p.get("title", "")
         jobs.append(
             {
+                # Composite ID prevents collisions between jobs on different career pages
+                # that share a common title (e.g. "Software Engineer").
                 "id": f"{url}::{title}",
                 "title": title,
                 "company": company,

@@ -14,6 +14,8 @@ from tools.wellfound_scraper import search_wellfound
 
 logger = logging.getLogger("job_agent")
 
+# "wellfound" is intentionally absent: it has its own dedicated scraper below.
+# Any site name not in this set is silently ignored by _scrape_jobspy.
 JOBSPY_SITES = {"linkedin", "indeed", "naukri", "zip_recruiter", "glassdoor"}
 
 

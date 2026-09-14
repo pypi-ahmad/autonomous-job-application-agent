@@ -12,6 +12,8 @@ STATUSES = ["Draft", "Approved", "Submitted", "Interview", "Rejected", "Offer"]
 
 
 def _now() -> str:
+    # All timeline timestamps are UTC ISO-8601. timezone.utc is explicit to avoid
+    # returning naive local-time datetimes if the system timezone is not UTC.
     return datetime.now(timezone.utc).isoformat()
 
 
@@ -22,6 +24,8 @@ def load_applications() -> list[dict]:
 
 
 def _save(applications: list[dict]) -> None:
+    # The entire list is serialized and written on every mutation (no partial updates).
+    # Acceptable at this scale; a concurrent write from two processes would lose one update.
     TRACKER_FILE.parent.mkdir(parents=True, exist_ok=True)
     TRACKER_FILE.write_text(json.dumps(applications, indent=2), encoding="utf-8")
 
