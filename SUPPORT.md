@@ -2,8 +2,7 @@
 
 This is a free, open-source, community-driven project. Support is
 best-effort — there's no paid support tier, no SLA, and no dedicated team
-behind it. Thanks for giving it a try; bug reports and feature ideas are
-genuinely welcome and help more than anything else.
+behind it. Bug reports and feature ideas are the most useful contributions.
 
 ## No donations, please
 
